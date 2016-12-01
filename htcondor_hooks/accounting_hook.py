@@ -84,24 +84,18 @@ def get_local_user(job_ad):
 
 def get_job_ad():
     import classad
-    try:
-        line = sys.stdin.readline()
-        route_ad = classad.ClassAd(line)
-    except SyntaxError:
-        LOG.error("Unable to parse classad: {0}".format(line))
-        return None
-
-    separator_line = sys.stdin.readline()
-    try:
-        assert separator_line == "------\n"
-    except AssertionError:
-        LOG.error("Separator line was not second line of STDIN")
-        return None
+    instream = sys.stdin
+    route = ""
+    while True:
+        newline = instream.readline()
+        if newline.startswith("------"):
+            break
+        route += newline
 
     try:
-        job_ad = classad.parseOne(sys.stdin, parser=classad.Parser.New)
-    except SyntaxError:
-        LOG.error("Unable to parse classad")
+        job_ad = classad.parseOne(instream, parser=classad.Parser.Old)
+    except (SyntaxError, ValueError):
+        LOG.error("Unable to parse classad: {0}".format(instream.readlines()))
         return None
 
     return job_ad
@@ -128,7 +122,7 @@ def set_accounting(job_ad, group, user):
 
     job_ad['AcctGroupUser'] = user
     job_ad['AccountingGroup'] = group
-
+    
     return job_ad
 
 
@@ -146,8 +140,11 @@ def setup_LOG(config):
 if __name__ == '__main__':
     config = get_config(CONFIG_FILE)
     setup_LOG(config)
-
+    
     job_ad = get_job_ad()
+    if job_ad is None:
+        sys.exit(FAILURE)
+#    print(job_ad)
     job_id = '{0}.{1}'.format(job_ad['ClusterId'], job_ad['ProcId'])
     LOG.debug("processing job {0}".format(job_id))
 
