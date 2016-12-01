@@ -22,7 +22,7 @@ import logging
 import os
 import ConfigParser
 import sys
-
+from .core import get_job_ad, setup_logger, get_local_user
 SUCCESS = 0
 FAILURE = 1
 
@@ -75,32 +75,6 @@ def get_user_mapping(config):
     return user_map
 
 
-def get_local_user(job_ad):
-    user_plus_domain = str(job_ad['User'])
-    user = user_plus_domain.split('@')[0]
-    LOG.debug('Identified submitter as {0}'.format(user))
-    return user
-
-
-def get_job_ad():
-    import classad
-    instream = sys.stdin
-    route = ""
-    while True:
-        newline = instream.readline()
-        if newline.startswith("------"):
-            break
-        route += newline
-
-    try:
-        job_ad = classad.parseOne(instream, parser=classad.Parser.Old)
-    except (SyntaxError, ValueError):
-        LOG.error("Unable to parse classad: {0}".format(instream.readlines()))
-        return None
-
-    return job_ad
-
-
 def get_accounting_group_for_user(config, user):
     user_map = get_user_mapping(config)
     default_group = config['groups']['default_group']
@@ -126,29 +100,18 @@ def set_accounting(job_ad, group, user):
     return job_ad
 
 
-def setup_LOG(config):
-    log_level = getattr(logging, config['hook']['log_level'])
-    LOG.setLevel(log_level)
-    logFormatter = logging.Formatter(
-        fmt='[%(asctime)s] %(levelname)s: %(message)s', datefmt='%Y-%m-%dT%H:%M:%S')
-
-    fileHandler = logging.FileHandler(config['hook']['log_file'])
-    fileHandler.setFormatter(logFormatter)
-    LOG.addHandler(fileHandler)
-
-
 if __name__ == '__main__':
     config = get_config(CONFIG_FILE)
-    setup_LOG(config)
+    setup_logger(config, LOG)
     
-    job_ad = get_job_ad()
+    job_ad = get_job_ad(LOG)
     if job_ad is None:
         sys.exit(FAILURE)
 #    print(job_ad)
     job_id = '{0}.{1}'.format(job_ad['ClusterId'], job_ad['ProcId'])
     LOG.debug("processing job {0}".format(job_id))
 
-    user = get_local_user(job_ad)
+    user = get_local_user(job_ad, LOG)
     group = get_accounting_group_for_user(config, user)
     job_ad = set_accounting(job_ad, group, user)
 
