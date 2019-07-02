@@ -31,8 +31,7 @@ def setup_logger(config, logger):
     logger.addHandler(fileHandler)
 
 
-def get_local_user(job_ad, logger):
+def get_local_user(job_ad):
     user_plus_domain = str(job_ad['User'])
     user = user_plus_domain.split('@')[0]
-    logger.debug('Identified submitter as {0}'.format(user))
     return user
