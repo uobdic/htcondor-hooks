@@ -46,6 +46,10 @@ def construct_blacklist(job_ad, config):
     requirements = job_ad['Requirements']
     requirements += ' && ' + blacklist_machines
 
+    job_ad['Requirements'] = requirements
+
+    return job_ad
+
 
 if __name__ == '__main__':
     config = get_config(CONFIG_FILE)
