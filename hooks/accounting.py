@@ -19,6 +19,11 @@ and applies the accounting_group and accounting_group_user classads to all route
 import os
 import ConfigParser
 import sys
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+htcondor_hooks_path = os.path.join(dir_path, '..')
+sys.path.insert(0, htcondor_hooks_path)
+
 from htcondor_hooks.core import get_job_ad, get_local_user
 SUCCESS = 0
 FAILURE = 1
