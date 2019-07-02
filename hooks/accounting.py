@@ -2,7 +2,7 @@
 '''
 Reads a configuration file of the form
 [hook]
-ignore_routes = 
+ignore_routes =
 
 [groups]
 physics.hep = \
@@ -19,34 +19,12 @@ and applies the accounting_group and accounting_group_user classads to all route
 import os
 import ConfigParser
 import sys
-from core import get_job_ad, get_local_user
+from htcondor_hooks.core import get_job_ad, get_local_user
 SUCCESS = 0
 FAILURE = 1
 
 
 CONFIG_FILE = "/etc/default/htcondor-accounting-job-router.ini"
-
-def get_job_ad():
-    import classad
-    instream = sys.stdin
-    route = ""
-    while True:
-        newline = instream.readline()
-        if newline.startswith("------"):
-            break
-        route += newline
-
-    try:
-        job_ad = classad.parseOne(instream, parser=classad.Parser.Old)
-    except (SyntaxError, ValueError):
-        return None
-
-    return job_ad
-
-def get_local_user(job_ad):
-    user_plus_domain = str(job_ad['User'])
-    user = user_plus_domain.split('@')[0]
-    return user
 
 
 def get_config(config_file):
@@ -108,7 +86,7 @@ def set_accounting(job_ad, group, user):
 
     job_ad['AcctGroupUser'] = user
     job_ad['AccountingGroup'] = group
-    
+
     return job_ad
 
 
