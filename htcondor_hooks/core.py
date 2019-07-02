@@ -2,7 +2,7 @@ import sys
 import logging
 
 
-def get_job_ad(logger):
+def get_job_ad():
     import classad
     instream = sys.stdin
     route = ""
@@ -15,8 +15,6 @@ def get_job_ad(logger):
     try:
         job_ad = classad.parseOne(instream, parser=classad.Parser.Old)
     except (SyntaxError, ValueError):
-        logger.error(
-            "Unable to parse classad: {0}".format(instream.readlines()))
         return None
 
     return job_ad
