@@ -15,6 +15,7 @@ htcondor_hooks_path = os.path.join(dir_path, '..')
 sys.path.insert(0, htcondor_hooks_path)
 
 from htcondor_hooks.core import get_job_ad
+
 SUCCESS = 0
 FAILURE = 1
 
@@ -33,6 +34,7 @@ def get_config(config_file):
 
 
 def construct_blacklist(job_ad, config):
+    import classad
     blacklist = config['blacklist']
     if not blacklist:
         return job_ad
@@ -43,10 +45,12 @@ def construct_blacklist(job_ad, config):
         blacklist_machines.append(template.format(machine=machine))
 
     blacklist_machines = ' && '.join(blacklist_machines)
+
     requirements = job_ad['Requirements']
-    requirements += ' && ' + blacklist_machines
+    requirements = classad.Literal(str(requirements) + ' && ' + blacklist_machines)
 
     job_ad['Requirements'] = requirements
+
 
     return job_ad
 
