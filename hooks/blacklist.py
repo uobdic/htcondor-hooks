@@ -39,7 +39,7 @@ def construct_blacklist(job_ad, config):
     if not blacklist:
         return job_ad
 
-    template = '( Target.Machine != "{machine}" )'
+    template = '( machine != "{machine}" )'
     blacklist_machines = []
     for machine in blacklist:
         blacklist_machines.append(template.format(machine=machine))
