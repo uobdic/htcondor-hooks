@@ -47,7 +47,7 @@ def construct_blacklist(job_ad, config):
     blacklist_machines = ' && '.join(blacklist_machines)
 
     requirements = job_ad['Requirements']
-    requirements = classad.Literal(str(requirements) + ' && ' + blacklist_machines)
+    requirements = classad.ExprTree(str(requirements) + ' && ' + blacklist_machines)
 
     job_ad['Requirements'] = requirements
 
